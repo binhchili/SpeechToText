@@ -26,10 +26,42 @@ export default function SpeechToText() {
         }
     }
 
+    const stopRecognizing = async () => {
+        //Stops listening for speech
+        try {
+            await Voice.stop();
+        } catch (e) {
+            //eslint-disable-next-line
+            console.error(e);
+        }
+    };
+
+    const cancelRecognizing = async () => {
+        //Cancels the speech recognition
+        try {
+            await Voice.cancel();
+        } catch (e) {
+            //eslint-disable-next-line
+            console.error(e);
+        }
+    };
+
     useEffect(() => {
+        Voice.onSpeechStart = onSpeechStart;
         Voice.onSpeechResults = onSpeechResults;
         Voice.onSpeechRecognized = onSpeechRecognized;
+        Voice.onSpeechPartialResults = onSpeechPartialResults;
+        return () => {
+            //destroy the process after switching the screen
+            Voice.destroy().then(Voice.removeAllListeners);
+        };
     }, [])
+
+    const onSpeechStart = (e) => {
+        //Invoked when .start() is called without error
+        console.log('onSpeechStart: ', e);
+
+    };
 
     const onSpeechResults = (e) => {
         setResult(e.value);
@@ -37,6 +69,12 @@ export default function SpeechToText() {
 
     const onSpeechRecognized = (e) => {
         console.log('onSpeechRecognized: ', e);
+
+    };
+
+    const onSpeechPartialResults = (e) => {
+        //Invoked when any results are computed
+        console.log('onSpeechPartialResults: ', e);
 
     };
     return (
@@ -47,13 +85,13 @@ export default function SpeechToText() {
                     <Text style={{ fontSize: 19 }}>{JSON.stringify(result)}</Text>
                 </View>
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#00AEEF' }} onPress={startRecording}>
+                    <TouchableOpacity style={styles.button} onPress={startRecording}>
                         <Text>Ghi âm</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ flex: 1 }}>
+                    <TouchableOpacity style={styles.button} onPress={stopRecognizing}>
                         <Text>Dừng</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ flex: 1 }}>
+                    <TouchableOpacity style={styles.button} onPress={cancelRecognizing}>
                         <Text>Huỷ</Text>
                     </TouchableOpacity>
                 </View>
@@ -70,9 +108,13 @@ const styles = StyleSheet.create({
         fontSize: 18, marginTop: 40
     },
     resultContainer: {
-        borderWidth: 1, borderColor: 'blue', width: '80%', height: 125, marginTop: 20
+        borderWidth: 1, borderColor: 'blue', width: '80%', height: 425, marginTop: 20
     },
     buttonContainer: {
-        marginTop: 100, borderWidth: 1, width: '70%', height: 60, flexDirection: 'row'
+        marginTop: 100, width: '70%', height: 60, flexDirection: 'row',
+    },
+    button: {
+        flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#00AEEF',
+        borderWidth: 1, borderColor: 'gray'
     }
 })
