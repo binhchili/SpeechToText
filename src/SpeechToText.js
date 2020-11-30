@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
+
 import Voice, {
     SpeechRecognizedEvent,
     SpeechResultsEvent,
@@ -64,7 +65,13 @@ export default function SpeechToText() {
     };
 
     const onSpeechResults = (e) => {
-        setResult(e.value);
+        let arr = e.value;
+        let newArr = [];
+        arr.forEach((ele ,index)=>{
+           newArr.push({key:index.toString(),value:ele});
+        })
+        console.log(JSON.stringify(newArr));
+        setResult(newArr);
     }
 
     const onSpeechRecognized = (e) => {
@@ -82,15 +89,16 @@ export default function SpeechToText() {
             <View style={styles.container}>
                 <Text style={styles.resultLabel}>Kết quả </Text>
                 <View style={styles.resultContainer}>
-                    <Text style={{ fontSize: 19 }}>{JSON.stringify(result)}</Text>
+                    {result.map((item )=>(
+                        <Text style={styles.resultText} key={item.key}>{item.value}</Text>
+                    ))}
+                    
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={startRecording}>
                         <Text>Ghi âm</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={stopRecognizing}>
-                        <Text>Dừng</Text>
-                    </TouchableOpacity>
+                   
                     <TouchableOpacity style={styles.button} onPress={cancelRecognizing}>
                         <Text>Huỷ</Text>
                     </TouchableOpacity>
@@ -111,10 +119,13 @@ const styles = StyleSheet.create({
         borderWidth: 1, borderColor: 'blue', width: '80%', height: 425, marginTop: 20
     },
     buttonContainer: {
-        marginTop: 100, width: '70%', height: 60, flexDirection: 'row',
+        marginTop: 100, width: '70%', height: 60, flexDirection: 'row', justifyContent:'space-around'
     },
     button: {
-        flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#00AEEF',
-        borderWidth: 1, borderColor: 'gray'
+         justifyContent: 'center', alignItems: 'center', backgroundColor: '#00AEEF',
+       height:'100%',width:'40%',borderRadius:10
+    },
+    resultText:{
+        fontSize:19, marginTop:10
     }
 })
